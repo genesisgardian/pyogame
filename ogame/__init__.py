@@ -920,29 +920,28 @@ class OGame(object):
                 planet_infos['coordinate']['galaxy'] = int(galaxy)
                 planet_infos['coordinate']['system'] = int(system)
                 planet_infos['coordinate']['position'] = int(position)
-                if len(tooltips) > 2:
-                    for i in range(1, 3):
-                        player_tooltip = tooltips[i]
-                        player_id_raw = player_tooltip.get('id')
-                        if player_id_raw.startswith('debris'):
-                            continue
-                        player_id = int(re.search(r'player(\d+)', player_id_raw).groups()[0])
-                        player_name = player_tooltip.find('h1').find('span').text
-                        player_rank = parse_int(player_tooltip.find('li', {'class': 'rank'}).find('a').text)
-                        break
-                elif len(tooltips) > 1:
-                    player_tooltip = tooltips[1]
+
+                player_id = None
+                player_name = row.find('td', {'class': 'playername'}).find('span').text.strip()
+                player_rank = None
+
+                for i in range(1, len(tooltips)):
+                    player_tooltip = tooltips[i]
                     player_id_raw = player_tooltip.get('id')
+                    if player_id_raw.startswith('debris') or player_id_raw.startswith('moon') or player_id_raw.startswith('alliance'):
+                        continue
                     player_id = int(re.search(r'player(\d+)', player_id_raw).groups()[0])
                     player_name = player_tooltip.find('h1').find('span').text
                     player_rank = parse_int(player_tooltip.find('li', {'class': 'rank'}).find('a').text)
-                else:
-                    player_id = None
-                    player_name = row.find('td', {'class': 'playername'}).find('span').text.strip()
-                    player_rank = None
+                    break
+               
                 planet_infos['player'] = {}
                 planet_infos['player']['id'] = player_id
                 planet_infos['player']['name'] = player_name
                 planet_infos['player']['rank'] = player_rank
+
+                #loginactive = row.findAll('a', {'class', 'tooltipRel'})
+                #print loginactive
+
                 res.append(planet_infos)
         return res
