@@ -939,9 +939,24 @@ class OGame(object):
                 planet_infos['player']['id'] = player_id
                 planet_infos['player']['name'] = player_name
                 planet_infos['player']['rank'] = player_rank
+                
+                planet_infos['player']['actives'] = True
 
-                #loginactive = row.findAll('a', {'class', 'tooltipRel'})
-                #print loginactive
+                # find actives status "i"
+                loginactive = row.findAll('span', {'class', 'status_abbr_inactive'})
+                for actives in loginactive :
+                    if actives.text == player_name :
+                        planet_infos['player']['actives'] = False
+                        break
+
+
+                # find actives status "I"
+                loginactive = row.findAll('span', {'class', 'status_abbr_longinactive'})
+                for actives in loginactive :
+                    if actives.text == player_name :
+                        planet_infos['player']['actives'] = False
+                        break
+
 
                 res.append(planet_infos)
         return res
