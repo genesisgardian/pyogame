@@ -960,3 +960,48 @@ class OGame(object):
 
                 res.append(planet_infos)
         return res
+
+    def fetch_spy_report(self):
+        html_url = self.get_url('messages', {'tab': 20, 'ajax': 1})
+        html_response = self.session.get(html_url).content.decode('utf8')
+        
+        html_parsed = BeautifulSoup(html_response, 'html.parser')
+        msg_heads = html_parsed.findAll('div', {'class': 'msg_head'})
+        msg_contents = html_parsed.findAll('span', {'class': 'msg_content'})
+
+        reports = []
+        for i in xrange(len(msg_heads)):
+            report = {}
+            
+            # get planet info
+            planet_info = msg_heads[i].find('a', {'class': 'txt_link'}).text.rsplit(' ', 1)
+            coordinates = planet_info[1][1:-1].split(':')
+            report['planet'] = planet_info[0]
+            report['coordinate'] = {}
+            report['coordinate']['galaxy'] = int(coordinates[0])
+            report['coordinate']['system'] = int(coordinates[1])
+            report['coordinate']['position'] = int(coordinates[2])
+
+            # parse msg content
+            msg_content = msg_contents[i].findAll('div', {'class': 'compacting'})
+            resources_info = msg_content[1].findAll('span', {'class': "resspan"})
+            trophy_info = msg_content[1].find('span', {'class': 'ctn ctn4 fright tooltipRight tooltipClose'}).get('title')
+
+            # get resouces
+            metal = resources_info[0].text.split()[1].replace(',', '')
+            crystal = resources_info[1].text.split()[1].replace(',', '')
+            deuterium = resources_info[2].text.split()[1].replace(',', '')
+            resources = {'metal': int(metal), 'crystal': int(crystal), 'deuterium': int(deuterium)}
+            report['resources'] = resources
+
+            # get trophy
+            trophys = trophy_info.split('<br/>')
+            resources_get = trophys[0].split()[1].replace(',', '')
+            small_cargo = trophys[1][:-4].split('>')[1].split()[1].replace(',', '')
+            large_cargo = trophys[2][:-4].split('>')[1].split()[1].replace(',', '')
+            trophy = {'resources_get': int(resources_get), 'small_cargo': int(small_cargo), 'large_cargo': int(large_cargo)}
+            report['trophy'] = trophy
+
+            reports.append(report)
+
+        return reports
