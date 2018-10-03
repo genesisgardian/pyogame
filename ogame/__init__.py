@@ -1005,3 +1005,15 @@ class OGame(object):
             reports.append(report)
 
         return reports
+
+    def get_fleet_slots(self):
+        res = self.session.get(self.get_url('movement')).content
+        if not self.is_logged(res):
+            raise NOT_LOGGED
+        soup = BeautifulSoup(res, 'html.parser')
+        fleetSlots = soup.find('span', {'class': 'fleetSlots'})
+        currentslot = fleetSlots.find('span', {'class': 'current'}).text
+        allslot = fleetSlots.find('span', {'class': 'all'}).text
+        slotinfo = [int(currentslot), int(allslot)]
+        return slotinfo
+
