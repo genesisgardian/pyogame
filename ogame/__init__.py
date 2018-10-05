@@ -932,7 +932,10 @@ class OGame(object):
                         continue
                     player_id = int(re.search(r'player(\d+)', player_id_raw).groups()[0])
                     player_name = player_tooltip.find('h1').find('span').text
-                    player_rank = parse_int(player_tooltip.find('li', {'class': 'rank'}).find('a').text)
+                    parse_rank = player_tooltip.find('li', {'class': 'rank'})
+                    player_rank = -1
+                    if parse_rank:
+                        player_rank = parse_int(parse_rank.find('a').text)
                     break
                
                 planet_infos['player'] = {}
